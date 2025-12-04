@@ -23,12 +23,7 @@ export const verifyAdminLogin = mutation({
       if (!isValid) {
         return { success: false, message: "Wrong password" };
       }
-
-      const adminToken = ADMIN_TOKEN;
-      if (!adminToken) {
-        throw new Error("Server misconfiguration: ADMIN_TOKEN not set");
-      }
-      return { success: true, adminToken };
+      return { success: true, adminToken: ADMIN_TOKEN };
     },
     //return await ctx.db.query("admins").collect();
   },
