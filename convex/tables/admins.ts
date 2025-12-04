@@ -14,7 +14,7 @@ export const verifyAdminLogin = mutation({
         return { success: false, message: "Invalid username" };
       }
   
-      const isValid = password === admin.password
+      const isValid = password == admin.password
   
       if (!isValid) {
         return { success: false, message: "Wrong password" };
