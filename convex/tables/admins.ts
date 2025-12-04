@@ -5,6 +5,8 @@ import { mutation } from "../_generated/server";
 const hashedPassword = bcrypt.hashSync("admin123", 10);
 console.log(hashedPassword);
 
+const ADMIN_TOKEN="539153146f648f30ebf6a407c1362b9232915315b1c6b468a1d30d722ea2746b";
+
 export const verifyAdminLogin = mutation({
   args: {
     username: v.string(),
@@ -22,8 +24,7 @@ export const verifyAdminLogin = mutation({
         return { success: false, message: "Wrong password" };
       }
 
-      const adminToken = process.env.ADMIN_TOKEN;
-      console.log("token: ", process.env.ADMIN_TOKEN);
+      const adminToken = ADMIN_TOKEN;
       if (!adminToken) {
         throw new Error("Server misconfiguration: ADMIN_TOKEN not set");
       }

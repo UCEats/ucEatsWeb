@@ -30,10 +30,10 @@ export default function Login({ onLogin }: LoginProps) {
 
       if (result.success) {
         // Save token in localStorage (or cookies if preferred)
-        localStorage.setItem("adminToken", result.adminToken);
+        localStorage.setItem("adminToken", result.adminToken || "");
 
         // Notify parent that login succeeded
-        onLogin(result.adminToken);
+        onLogin(result.adminToken || "");
       } else {
         setError(result.message || "Something went wrong. Please try again.");
       }
