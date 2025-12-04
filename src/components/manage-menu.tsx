@@ -48,7 +48,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     "breakfast" | "lunch" | "dinner"
   >("breakfast");
   const [localMeals, setLocalMeals] = useState<Meal[]>([]);
-  const [mealsForDay, setMealsForDay] = useState<any[]>([]);
+  //const [mealsForDay, setMealsForDay] = useState<any[]>([]);
   const [selectedFeedbackFilter, setSelectedFeedbackFilter] =
     useState<mealType>("All");
 
@@ -140,15 +140,6 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     const dateRecord = await getOrCreateDate({ date });
     setSelectedDateID(dateRecord as Id<"dates">);
   };
-
-  useEffect(() => {
-    if (!mealsQuery) {
-      // new date selected → clear immediately
-      setMealsForDay([]);
-    } else {
-      setMealsForDay(mealsQuery);
-    }
-  }, [mealsQuery]);
 
   const handleCreateOrEditMeal = async (mealData: {
     name: string;
@@ -295,8 +286,6 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     newDate.setDate(newDate.getDate() + 7);
     setCurrentWeek(newDate);
   };
-
-  type mealType = "breakfast" | "lunch" | "dinner" | "All";
 
   const allFeedbackQuery = useQuery(
     api.tables.feedback.getAllFeedbackForDate,
