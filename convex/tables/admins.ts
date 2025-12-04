@@ -1,9 +1,5 @@
-import bcrypt from "bcryptjs";
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
-
-const hashedPassword = bcrypt.hashSync("admin123", 10);
-console.log(hashedPassword);
 
 const ADMIN_TOKEN="539153146f648f30ebf6a407c1362b9232915315b1c6b468a1d30d722ea2746b";
 
@@ -18,7 +14,7 @@ export const verifyAdminLogin = mutation({
         return { success: false, message: "Invalid username" };
       }
   
-      const isValid = await bcrypt.compareSync(password, admin.password)
+      const isValid = password === admin.password
   
       if (!isValid) {
         return { success: false, message: "Wrong password" };
