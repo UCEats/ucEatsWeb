@@ -14,7 +14,12 @@ export const verifyAdminLogin = mutation({
         return { success: false, message: "Invalid username" };
       }
   
-      const isValid = password == admin.password
+      console.log("password entered:", password);
+      console.log("password in db:", admin.password);
+      console.log("typeof db password:", typeof admin.password);
+      
+      const isValid = password.trim() === String(admin.password).trim();
+      console.log("isValid?", isValid);
   
       if (!isValid) {
         return { success: false, message: "Wrong password" };
