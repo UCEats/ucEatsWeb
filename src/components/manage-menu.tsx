@@ -442,7 +442,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
                       {day.slice(0, 3)}
                     </span>
                     <span className="text-xs opacity-70">
-                      {weekDates[index].toLocaleDateString("en-SG", {
+                      {weekDates[index].toLocaleDateString("en-US", {
                         month: "numeric",
                         day: "numeric",
                       })}
