@@ -119,6 +119,10 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   }, []);
 
   useEffect(() => {
+    setLocalMeals([]);
+  }, [selectedDate]);
+
+  useEffect(() => {
     // Compute selectedDate from current week + selected day
     const newSelectedDate = toLocalDateString(weekDates[selectedDayIndex]);
     setSelectedDate(newSelectedDate);
@@ -219,10 +223,12 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     setSelectedMealType(meal.mealType);
     setIsModalOpen(true);
   };
-
-  const mealsForCurrentDay = (
-    localMeals.length > 0 ? localMeals : mealsQuery || []
-  )
+  const mealsForCurrentDay = [
+    ...(mealsQuery || []),
+    ...localMeals.filter(
+      (m) => !(mealsQuery || []).some((q) => q._id === m._id)
+    ),
+  ]
     .map((meal: any) => {
       const mealDate = new Date(meal.date || selectedDate);
       return {
@@ -232,15 +238,29 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     })
     .filter((meal) => meal.day === currentDay);
 
-  const allMeals =
-    localMeals.length > 0
-      ? localMeals
-      : isLoadingForDate
-        ? null
-        : mealsQuery || [];
+  const allMeals = useMemo(() => {
+    if (!mealsQuery) return localMeals;
+
+    // Use a Map keyed by _id (string)
+    const mealsMap = new Map<string, any>();
+
+    // Add all Convex rows first
+    mealsQuery.forEach((m) => {
+      if (m._id) mealsMap.set(m._id.toString(), m);
+    });
+
+    // Merge localMeals, but don't overwrite existing rows
+    localMeals.forEach((m) => {
+      if (m._id && !mealsMap.has(m._id.toString())) {
+        mealsMap.set(m._id.toString(), m);
+      }
+    });
+
+    return Array.from(mealsMap.values());
+  }, [mealsQuery, localMeals]);
 
   const mealsByDay = useMemo(() => {
-    if (!allMeals) return {}; // or return null to show loader in UI
+    if (!allMeals) return {};
     const dayMap = [
       "Monday",
       "Tuesday",
@@ -251,7 +271,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
       "Sunday",
     ];
     return allMeals.reduce((acc: any, meal: any) => {
-      const mealDate = new Date(meal.date || selectedDate);
+      const mealDate = new Date(meal.date || selectedDate); // fallback to selectedDate if missing
       const dayName =
         dayMap[mealDate.getDay() === 0 ? 6 : mealDate.getDay() - 1];
       if (!acc[dayName]) acc[dayName] = [];
@@ -415,7 +435,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
               const isToday =
                 weekDates[index].toDateString() === new Date().toDateString();
               const isSelected = selectedDayIndex === index;
-              const mealCount = isQueryLoaded ? getMealsForDay(day).length : 0;
+              const mealCount = getMealsForDay(day).length;
 
               return (
                 <button
