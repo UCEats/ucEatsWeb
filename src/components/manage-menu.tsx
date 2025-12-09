@@ -430,7 +430,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
             </button>
           </div>
 
-          <div className="flex gap-1 border border-border bg-card p-1 rounded-xl shadow-sm">
+          <div className="flex gap-1 border border-border bg-card p-1 rounded-xl shadow-sm overflow-x-auto">
             {daysOfWeek.map((day, index) => {
               const isToday =
                 weekDates[index].toDateString() === new Date().toDateString();
