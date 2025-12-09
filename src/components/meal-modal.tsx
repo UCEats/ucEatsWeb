@@ -42,14 +42,14 @@ export default function MealModal({
       setMealType(meal.mealType);
       setIsVegetarian(meal.isVegetarian);
       setIsVegan(meal.isVegan);
-    } else {
+    } else if (isOpen) {
       setName("");
       setCategory("main");
       setMealType(defaultMealType);
       setIsVegetarian(false);
       setIsVegan(false);
     }
-  }, [meal, defaultMealType]);
+  }, [meal, isOpen, defaultMealType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
