@@ -92,7 +92,7 @@ export default function MealModal({
                 htmlFor="meal-name"
                 className="mb-2 block text-sm font-medium text-foreground"
               >
-                Meal Name
+                Item Name
               </label>
               <input
                 id="meal-name"
