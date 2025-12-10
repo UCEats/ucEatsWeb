@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import MealItem from "./meal-item";
+import AddMealImage from "./add-meal-image";
 import type { Meal } from "./manage-menu";
+import { useNavigate } from "react-router-dom";
+import { ImageIcon } from "lucide-react";
 
 type DayContentProps = {
   day: string;
@@ -12,6 +15,7 @@ type DayContentProps = {
   onAddMeal: (mealType: "breakfast" | "lunch" | "dinner") => void;
   onEditMeal: (meal: any) => void;
   onDeleteMeal: (meal: any) => void;
+  onOpenPresentation?: (section: "breakfast" | "lunch" | "dinner") => void;
 };
 
 export default function DayContent({
@@ -21,6 +25,7 @@ export default function DayContent({
   onAddMeal,
   onEditMeal,
   onDeleteMeal,
+  onOpenPresentation,
 }: DayContentProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(
     "Breakfast"
@@ -35,10 +40,20 @@ export default function DayContent({
     });
   };
 
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // months are 0-based
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`; // "2025-12-10"
+  };
+
+  const dateInput = getLocalDateString(date);
+
   const getMealsByType = (type: "breakfast" | "lunch" | "dinner") => {
     return meals.filter((meal) => meal.mealType === type);
   };
 
+  console.log(dateInput);
   const breakfastMeals = getMealsByType("breakfast");
   const lunchMeals = getMealsByType("lunch");
   const dinnerMeals = getMealsByType("dinner");
@@ -75,16 +90,29 @@ export default function DayContent({
             </span>
           </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddMeal(title);
-            }}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" />
-            Add Meal
-          </button>
+          <div className="flex items-center gap-3">
+            <AddMealImage date={dateInput} section={title} />
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenPresentation?.(title);
+              }}
+              className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-accent/90"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddMeal(title);
+              }}
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              Add Meal
+            </button>
+          </div>
         </button>
 
         <div

@@ -10,6 +10,7 @@ import ContentLoader from "react-content-loader";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Star } from "lucide-react";
 import { Filter } from "lucide-react";
+import { Leaf } from "lucide-react";
 
 export type Meal = {
   _id?: Id<"menuItems">;
@@ -104,6 +105,33 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const isQueryLoaded = !!mealsQuery;
 
   const isLoadingForDate = selectedDateID && !mealsQuery;
+
+  const [presentationSection, setPresentationSection] = useState<{
+    section: "breakfast" | "lunch" | "dinner";
+    date: string; // YYYY-MM-DD
+  } | null>(null);
+
+  const handleOpenPresentation = (
+    section: "breakfast" | "lunch" | "dinner"
+  ) => {
+    setPresentationSection({ section, date: selectedDate });
+  };
+
+  const handleBackFromPresentation = () => {
+    setPresentationSection(null);
+  };
+
+  const presentationMealsQuery = useQuery(
+    api.tables.meals.getMealsForDate,
+    presentationSection ? { dateId: selectedDateID! } : "skip"
+  );
+
+  const presentationSectionImageQuery = useQuery(
+    api.tables.files.getSectionImage,
+    presentationSection && selectedDateID
+      ? { date: presentationSection.date, section: presentationSection.section }
+      : "skip"
+  );
 
   // Initialize selected date on mount
   useEffect(() => {
@@ -358,6 +386,125 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
   const isLoadingForFeedback = !selectedDateID && !getFeedback;
 
+  if (presentationSection) {
+    const { section, date } = presentationSection;
+
+    const sectionMeals: Meal[] = (presentationMealsQuery || [])
+      .filter((meal) => meal.mealType === section)
+      .map((meal) => ({
+        _id: meal._id,
+        name: meal.name,
+        mealType: meal.mealType,
+        mealCategory: meal.mealCategory,
+        isVegan: meal.isVegan,
+        isVegetarian: meal.isVegetarian,
+        date,
+      }));
+
+    const sectionImage = presentationSectionImageQuery?.imageUrl || null;
+
+    const groupMeals = (category: "main" | "side" | "dessert") => {
+      const filtered = sectionMeals.filter(
+        (meal) => meal.mealCategory === category
+      );
+      return filtered.length ? filtered : [{ name: `No ${category}` } as Meal];
+    };
+
+    // Calculate dynamic scaling
+    const totalMeals = sectionMeals.length || 1; // avoid divide by zero
+    const mealFontSizeVh = Math.max(1.5, 20 / totalMeals); // scales down with more items
+    const headerFontVh = Math.min(8, 60 / totalMeals); // main header shrinks if many meals
+    const categoryFontVh = Math.min(5, 40 / totalMeals); // category header shrinks
+
+    return (
+      <div className="w-screen h-screen bg-gray-50 font-sans flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex justify-between items-center px-6 py-2">
+          <button
+            onClick={handleBackFromPresentation}
+            className="px-4 py-2 bg-white shadow rounded hover:bg-gray-100 font-medium z-10"
+          >
+            ← Back
+          </button>
+          <div className="flex-1 text-center">
+            <h1
+              className="text-gray-800 font-bold truncate"
+              style={{ fontSize: `${headerFontVh}vh` }}
+            >
+              {section.charAt(0).toUpperCase() + section.slice(1)}
+            </h1>
+            <p
+              className="text-gray-500"
+              style={{ fontSize: `${headerFontVh / 2}vh` }}
+            >
+              {date}
+            </p>
+          </div>
+          <div className="w-16" /> {/* symmetry */}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 flex justify-between px-6 gap-4 items-center overflow-hidden">
+          {/* Left Image */}
+          {sectionImage && (
+            <img
+              src={sectionImage}
+              alt={`${section} image`}
+              className="hidden md:block w-1/6 max-h-full object-cover rounded-lg shadow-lg flex-shrink-0"
+            />
+          )}
+
+          {/* Meals */}
+          <div className="flex-1 flex flex-col justify-center gap-4 overflow-hidden h-full">
+            {(["main", "side", "dessert"] as const).map((category) => {
+              const meals = groupMeals(category);
+
+              return (
+                <div
+                  key={category}
+                  className="flex flex-col items-center overflow-hidden"
+                >
+                  <h2
+                    className="text-gray-700 font-semibold truncate"
+                    style={{ fontSize: `${categoryFontVh}vh` }}
+                  >
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </h2>
+                  <ul className="flex flex-col items-center gap-1 overflow-hidden">
+                    {meals.map((meal) => (
+                      <li
+                        key={meal._id || meal.name}
+                        className="flex items-center gap-2 px-2 py-1 bg-white rounded shadow text-gray-800 truncate"
+                        style={{ fontSize: `${mealFontSizeVh}vh` }}
+                      >
+                        {meal.name}
+                        {meal.isVegetarian && (
+                          <Leaf className="w-4 h-4 text-green-500" />
+                        )}
+                        {meal.isVegan && (
+                          <Leaf className="w-4 h-4 text-yellow-500" />
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Right Image */}
+          {sectionImage && (
+            <img
+              src={sectionImage}
+              alt={`${section} image`}
+              className="hidden md:block w-1/6 max-h-full object-cover rounded-lg shadow-lg flex-shrink-0"
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-8 lg:p-12">
       <div className="mx-auto max-w-6xl">
@@ -498,6 +645,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
             onAddMeal={handleAddMeal}
             onEditMeal={handleEditMeal}
             onDeleteMeal={handleDeleteMeal}
+            onOpenPresentation={handleOpenPresentation}
           />
         )}
       </div>

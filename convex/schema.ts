@@ -12,6 +12,7 @@ export default defineSchema({
     date: v.string(), // "2025-11-22" (ISO format)
     createdAt: v.number(),
   }).index("by_date", ["date"]), 
+  
   menuItems: defineTable({
     dateId: v.string(),
     name: v.string(),
@@ -21,6 +22,7 @@ export default defineSchema({
     isVegetarian: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
+
   }).index("by_dateId", ["dateId"]),
 
   feedback: defineTable({
@@ -48,6 +50,13 @@ export default defineSchema({
   .index("bydate_mealType", ["mealType", "dateId"])
   .index("by_dateId", ["dateId"]),
 
+   sectionImages: defineTable({
+    date: v.string(),
+    section: v.union(v.literal("breakfast"), v.literal("lunch"), v.literal("dinner")),
+    storageId: v.id("_storage"),
+    imageUrl: v.optional(v.string()),
+    fileName: v.optional(v.string())
+  }).index("by_date_section",["date","section"])
   
 });
 
