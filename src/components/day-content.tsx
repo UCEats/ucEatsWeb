@@ -5,7 +5,6 @@ import { ChevronDown, Plus } from "lucide-react";
 import MealItem from "./meal-item";
 import AddMealImage from "./add-meal-image";
 import type { Meal } from "./manage-menu";
-import { useNavigate } from "react-router-dom";
 import { ImageIcon } from "lucide-react";
 
 type DayContentProps = {
