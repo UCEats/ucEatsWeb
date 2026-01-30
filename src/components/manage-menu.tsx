@@ -437,7 +437,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
               className="text-gray-500"
               style={{ fontSize: `${headerFontVh / 2}vh` }}
             >
-              {date}
+              {date.split("-").reverse().join("/")}
             </p>
           </div>
           <div className="w-16" /> {/* symmetry */}
@@ -609,7 +609,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
                       {day.slice(0, 3)}
                     </span>
                     <span className="text-xs opacity-70">
-                      {weekDates[index].toLocaleDateString("en-US", {
+                      {weekDates[index].toLocaleDateString("en-AU", {
                         month: "numeric",
                         day: "numeric",
                       })}

@@ -3,11 +3,6 @@ import { v } from "convex/values";
 
 export default defineSchema({
   // Other tables here...
-
-  admins: defineTable({
-    password: v.string(),
-    username: v.string(),
-  }),
   dates: defineTable({
     date: v.string(), // "2025-11-22" (ISO format)
     createdAt: v.number(),
