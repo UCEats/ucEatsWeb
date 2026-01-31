@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as tables_auth from "../tables/auth.js";
 import type * as tables_dates from "../tables/dates.js";
 import type * as tables_feedback from "../tables/feedback.js";
 import type * as tables_files from "../tables/files.js";
@@ -21,7 +20,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "tables/auth": typeof tables_auth;
   "tables/dates": typeof tables_dates;
   "tables/feedback": typeof tables_feedback;
   "tables/files": typeof tables_files;

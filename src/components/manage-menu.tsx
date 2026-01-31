@@ -43,7 +43,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string>(""); // YYYY-MM-DD
   const [selectedDateID, setSelectedDateID] = useState<Id<"dates"> | null>(
-    null
+    null,
   );
   const [selectedMealType, setSelectedMealType] = useState<
     "breakfast" | "lunch" | "dinner"
@@ -95,7 +95,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
   const queryArgs = useMemo(
     () => (selectedDateID ? { dateId: selectedDateID as Id<"dates"> } : "skip"),
-    [selectedDateID]
+    [selectedDateID],
   );
 
   // Convex query for meals
@@ -112,7 +112,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   } | null>(null);
 
   const handleOpenPresentation = (
-    section: "breakfast" | "lunch" | "dinner"
+    section: "breakfast" | "lunch" | "dinner",
   ) => {
     setPresentationSection({ section, date: selectedDate });
   };
@@ -123,14 +123,14 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
   const presentationMealsQuery = useQuery(
     api.tables.meals.getMealsForDate,
-    presentationSection ? { dateId: selectedDateID! } : "skip"
+    presentationSection ? { dateId: selectedDateID! } : "skip",
   );
 
   const presentationSectionImageQuery = useQuery(
     api.tables.files.getSectionImage,
     presentationSection && selectedDateID
       ? { date: presentationSection.date, section: presentationSection.section }
-      : "skip"
+      : "skip",
   );
 
   // Initialize selected date on mount
@@ -188,19 +188,17 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     try {
       if (editingMeal && editingMeal._id) {
         await updateMealMutation({
-          adminToken: localStorage.getItem("adminToken") || "",
           mealId: editingMeal._id as Id<"menuItems">,
           ...mealData,
           updatedAt: Date.now(),
         });
         setLocalMeals((prev) =>
           prev.map((m) =>
-            m._id === editingMeal._id ? { ...m, ...mealData } : m
-          )
+            m._id === editingMeal._id ? { ...m, ...mealData } : m,
+          ),
         );
       } else {
         const newMealId = await createMealMutation({
-          adminToken: localStorage.getItem("adminToken") || "",
           dateId: selectedDateID,
           ...mealData,
         });
@@ -231,7 +229,6 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const handleDeleteMeal = async (mealId: string) => {
     try {
       await deleteMealMutation({
-        adminToken: localStorage.getItem("adminToken") || "",
         mealId: mealId as Id<"menuItems">,
       });
       setLocalMeals((prev) => prev.filter((m) => m._id !== mealId));
@@ -254,7 +251,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const mealsForCurrentDay = [
     ...(mealsQuery || []),
     ...localMeals.filter(
-      (m) => !(mealsQuery || []).some((q) => q._id === m._id)
+      (m) => !(mealsQuery || []).some((q) => q._id === m._id),
     ),
   ]
     .map((meal: any) => {
@@ -337,14 +334,14 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
   const allFeedbackQuery = useQuery(
     api.tables.feedback.getAllFeedbackForDate,
-    selectedDateID ? { dateId: selectedDateID } : "skip"
+    selectedDateID ? { dateId: selectedDateID } : "skip",
   );
 
   const mealFeedbackQuery = useQuery(
     api.tables.feedback.getFeedbackForDateAndMealType,
     selectedDateID && selectedFeedbackFilter !== "All"
       ? { dateId: selectedDateID, mealType: selectedFeedbackFilter }
-      : "skip"
+      : "skip",
   );
 
   const getFeedback =
@@ -354,7 +351,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     if (!getFeedback) return [];
     if (selectedFeedbackFilter === "All") return getFeedback;
     return getFeedback?.filter(
-      (item: FeedbackItem) => item.mealType === selectedFeedbackFilter
+      (item: FeedbackItem) => item.mealType === selectedFeedbackFilter,
     );
   }, [getFeedback, selectedFeedbackFilter]);
 
@@ -362,7 +359,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     if (!filteredFeedback || filteredFeedback.length === 0) return 0;
     const sum = filteredFeedback.reduce(
       (acc: number, item: FeedbackItem) => acc + item.rating,
-      0
+      0,
     );
     return (sum / filteredFeedback.length).toFixed(1);
   }, [filteredFeedback]);
@@ -405,7 +402,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
     const groupMeals = (category: "main" | "side" | "dessert") => {
       const filtered = sectionMeals.filter(
-        (meal) => meal.mealCategory === category
+        (meal) => meal.mealCategory === category,
       );
       return filtered.length ? filtered : [{ name: `No ${category}` } as Meal];
     };

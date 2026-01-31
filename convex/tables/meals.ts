@@ -1,7 +1,5 @@
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
-import { adminAuthArgs, verifyAdmin } from "./auth";
-
 export const getMealsForDate = query({
   args: {
     dateId: v.id("dates"),
@@ -23,7 +21,6 @@ export const getMealById = query({
 
 export const createMeal = mutation({
   args: {
-    ...adminAuthArgs,
     dateId: v.id("dates"),
     mealType: v.union(
       v.literal("breakfast"),
@@ -40,7 +37,6 @@ export const createMeal = mutation({
     isVegetarian: v.boolean(),
   },
   handler: async (ctx, args) => {
-    verifyAdmin(args.adminToken);
     return await ctx.db.insert("menuItems", {
       name: args.name,
       mealCategory: args.mealCategory,
@@ -56,7 +52,6 @@ export const createMeal = mutation({
 
 export const updateMeal = mutation({
     args: {
-      ...adminAuthArgs,
       mealId: v.id("menuItems"),
       name: v.optional(v.string()),
       mealCategory: v.optional(v.union(
@@ -76,8 +71,7 @@ export const updateMeal = mutation({
       updatedAt: v.number()
     },
     handler: async (ctx, args) => {
-      verifyAdmin(args.adminToken);
-      const { mealId, adminToken, ...patch } = args;
+      const { mealId, ...patch } = args;
   
     // Only update the table fields + updatedAt
     const updatedFields: Record<string, any> = {
@@ -93,11 +87,9 @@ export const updateMeal = mutation({
 
 export const deleteMeal = mutation({
   args: {
-    ...adminAuthArgs,
     mealId: v.id("menuItems"),
   },
   handler: async (ctx, args) => {
-    verifyAdmin(args.adminToken);
     await ctx.db.delete(args.mealId);
   },
 });
