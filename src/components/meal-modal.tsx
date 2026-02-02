@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import { useEffect, useState } from "react";
+import type React from "react";
 import { X } from "lucide-react";
 import type { Meal } from "./manage-menu";
 
@@ -30,7 +29,7 @@ export default function MealModal({
   const [name, setName] = useState("");
   const [category, setCategory] = useState<"main" | "side" | "dessert">("main");
   const [mealType, setMealType] = useState<"breakfast" | "lunch" | "dinner">(
-    defaultMealType
+    defaultMealType,
   );
   const [isVegetarian, setIsVegetarian] = useState(false);
   const [isVegan, setIsVegan] = useState(false);

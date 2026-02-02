@@ -41,7 +41,7 @@ export default function DayCard({
   const renderMealSection = (
     title: "Breakfast" | "Lunch" | "Dinner",
     meals: Meal[],
-    sectionKey: string
+    sectionKey: string,
   ) => {
     const isExpanded = expandedSection === sectionKey;
 
@@ -95,7 +95,7 @@ export default function DayCard({
                       onEdit={() => onEditMeal(meal)}
                       onDelete={() => onDeleteMeal(meal._id!)}
                     />
-                  ) : null
+                  ) : null,
                 )}
               </div>
             )}

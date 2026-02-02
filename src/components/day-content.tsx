@@ -27,7 +27,7 @@ export default function DayContent({
   onOpenPresentation,
 }: DayContentProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(
-    "Breakfast"
+    "Breakfast",
   );
 
   const formatDate = (date: Date) => {
@@ -52,7 +52,6 @@ export default function DayContent({
     return meals.filter((meal) => meal.mealType === type);
   };
 
-  console.log(dateInput);
   const breakfastMeals = getMealsByType("breakfast");
   const lunchMeals = getMealsByType("lunch");
   const dinnerMeals = getMealsByType("dinner");
@@ -64,7 +63,7 @@ export default function DayContent({
   const renderMealSection = (
     title: "breakfast" | "lunch" | "dinner",
     meals: Meal[],
-    sectionKey: string
+    sectionKey: string,
   ) => {
     const isExpanded = expandedSection === sectionKey;
     const newTitle = title.charAt(0).toUpperCase() + title.slice(1);
