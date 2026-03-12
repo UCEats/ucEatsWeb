@@ -14,7 +14,7 @@ type AddMealImageProps = {
 export default function AddMealImage({ date, section }: AddMealImageProps) {
   const generateUploadUrl = useMutation(api.tables.files.generateUploadUrl);
   const linkSectionImage = useMutation(api.tables.files.linkSectionImage);
-  const deleteSectionImage = useMutation(api.tables.files.deleteSectionImage); // optional: mutation to remove from DB
+  const deleteSectionImage = useMutation(api.tables.files.deleteSectionImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);

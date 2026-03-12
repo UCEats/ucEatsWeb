@@ -1,16 +1,21 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, ChefHat, LogOut } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChefHat,
+  LogOut,
+  Star,
+  Filter,
+  Leaf,
+} from "lucide-react";
 import DayContent from "./day-content";
 import MealModal from "./meal-modal";
 import { api } from "../../convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import ContentLoader from "react-content-loader";
 import type { Id } from "../../convex/_generated/dataModel";
-import { Star } from "lucide-react";
-import { Filter } from "lucide-react";
-import { Leaf } from "lucide-react";
 
 export type Meal = {
   _id?: Id<"menuItems">;
@@ -36,6 +41,16 @@ interface FeedbackItem {
 
 type mealType = "breakfast" | "lunch" | "dinner" | "All";
 
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
 export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,19 +64,8 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     "breakfast" | "lunch" | "dinner"
   >("breakfast");
   const [localMeals, setLocalMeals] = useState<Meal[]>([]);
-  //const [mealsForDay, setMealsForDay] = useState<any[]>([]);
   const [selectedFeedbackFilter, setSelectedFeedbackFilter] =
     useState<mealType>("All");
-
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
 
   const LoadingSkeleton = () => (
     <ContentLoader height={100} width={400} speed={2}>
@@ -85,7 +89,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
   const weekDates = getWeekDates(currentWeek);
 
-  const currentDay = daysOfWeek[selectedDayIndex];
+  const currentDay = DAYS_OF_WEEK[selectedDayIndex];
   const currentDate = weekDates[selectedDayIndex];
 
   const getOrCreateDate = useMutation(api.tables.dates.getOrCreateDate);
@@ -102,9 +106,10 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const mealsQuery =
     useQuery(api.tables.meals.getMealsForDate, queryArgs) ?? null;
 
-  const isQueryLoaded = !!mealsQuery;
-
-  const isLoadingForDate = selectedDateID && !mealsQuery;
+  // query returns `null` while pending; afterwards it is an array (maybe empty)
+  const isQueryLoaded = mealsQuery !== null;
+  // show loading skeleton any time the query hasn't returned yet
+  const isLoadingForDate = mealsQuery === null;
 
   const [presentationSection, setPresentationSection] = useState<{
     section: "breakfast" | "lunch" | "dinner";
@@ -286,19 +291,10 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
   const mealsByDay = useMemo(() => {
     if (!allMeals) return {};
-    const dayMap = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ];
     return allMeals.reduce((acc: any, meal: any) => {
       const mealDate = new Date(meal.date || selectedDate); // fallback to selectedDate if missing
       const dayName =
-        dayMap[mealDate.getDay() === 0 ? 6 : mealDate.getDay() - 1];
+        DAYS_OF_WEEK[mealDate.getDay() === 0 ? 6 : mealDate.getDay() - 1];
       if (!acc[dayName]) acc[dayName] = [];
       acc[dayName].push(meal);
       return acc;
@@ -527,7 +523,6 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
                   onClick={onLogout}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:border-red-300 hover:shadow-sm"
                 >
-                  <LogOut className="h-4 w-4" />
                   <span className="text-sm font-medium">Logout</span>
                 </button>
               )}
@@ -575,7 +570,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
           </div>
 
           <div className="flex gap-1 border border-border bg-card p-1 rounded-xl shadow-sm overflow-x-auto">
-            {daysOfWeek.map((day, index) => {
+            {DAYS_OF_WEEK.map((day, index) => {
               const isToday =
                 weekDates[index].toDateString() === new Date().toDateString();
               const isSelected = selectedDayIndex === index;
@@ -630,8 +625,11 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
         </div>
 
         {isLoadingForDate ? (
-          // Only replace the DayContent section
-          <div className="mt-4">
+          // Replace the DayContent section with a few loading rows while the query
+          // is pending. This prevents the UI from rendering an empty list briefly.
+          <div className="mt-4 space-y-3">
+            <LoadingSkeleton />
+            <LoadingSkeleton />
             <LoadingSkeleton />
           </div>
         ) : (
