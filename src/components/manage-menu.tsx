@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChefHat,
-  LogOut,
   Star,
   Filter,
   Leaf,
