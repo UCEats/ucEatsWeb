@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import DayContent from "./day-content";
 import MealModal from "./meal-modal";
+import GeneralFeedbackModal from "./general-feedback-modal";
 import { api } from "../../convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import ContentLoader from "react-content-loader";
@@ -65,6 +66,11 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const [localMeals, setLocalMeals] = useState<Meal[]>([]);
   const [selectedFeedbackFilter, setSelectedFeedbackFilter] =
     useState<mealType>("All");
+  const [isGeneralFeedbackOpen, setIsGeneralFeedbackOpen] = useState(false);
+  const [lastViewedAt, setLastViewedAt] = useState<number>(() => {
+    const stored = localStorage.getItem("lastViewedGeneralFeedback");
+    return stored ? Number(stored) : 0;
+  });
 
   const LoadingSkeleton = () => (
     <ContentLoader height={100} width={400} speed={2}>
@@ -136,6 +142,20 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
       ? { date: presentationSection.date, section: presentationSection.section }
       : "skip",
   );
+
+  const generalFeedback = useQuery(api.tables.feedback.getAllGeneralFeedback);
+  const hasNewFeedback = generalFeedback?.some((f: { createdAt: number }) => f.createdAt > lastViewedAt) ?? false;
+
+  const handleOpenGeneralFeedback = () => {
+    setIsGeneralFeedbackOpen(true);
+  };
+
+  const handleCloseGeneralFeedback = () => {
+    const now = Date.now();
+    localStorage.setItem("lastViewedGeneralFeedback", String(now));
+    setLastViewedAt(now);
+    setIsGeneralFeedbackOpen(false);
+  };
 
   // Initialize selected date on mount
   useEffect(() => {
@@ -552,7 +572,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
         {/* Day selector */}
         <div className="mb-6">
-          <div className="flex justify-start mb-2">
+          <div className="flex items-center justify-between mb-2">
             <button
               onClick={async () => {
                 const today = new Date();
@@ -566,6 +586,17 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
             >
               Go to Today
             </button>
+            <div className="relative">
+              <button
+                onClick={handleOpenGeneralFeedback}
+                className="flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full bg-gradient-to-r from-primary to-primary/80 text-white shadow-md hover:scale-105 hover:shadow-lg hover:from-primary/90 hover:to-primary transition-all duration-200"
+              >
+                View General Feedback
+              </button>
+              {hasNewFeedback && (
+                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-background" />
+              )}
+            </div>
           </div>
 
           <div className="flex gap-1 border border-border bg-card p-1 rounded-xl shadow-sm overflow-x-auto">
@@ -653,6 +684,12 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
         onSave={handleCreateOrEditMeal}
         meal={editingMeal}
         defaultMealType={selectedMealType}
+      />
+      <GeneralFeedbackModal
+        isOpen={isGeneralFeedbackOpen}
+        onClose={handleCloseGeneralFeedback}
+        feedbackItems={generalFeedback ?? []}
+        lastViewedAt={lastViewedAt}
       />
       <section className="bg-background-50 border-t border-border mt-16">
         <div className="max-w-7xl mx-auto px-6 py-10">

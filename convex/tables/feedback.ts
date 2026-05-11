@@ -72,3 +72,34 @@ export const submitFeedback = mutation({
     });
   },
 });
+
+export const submitGeneralFeedback = mutation({
+  args: {
+    deviceId: v.string(),
+    name: v.string(),
+    comment: v.string(),
+  },
+  handler: async (ctx, args) => {
+    if (args.name.trim().length === 0 || args.name.length > 100)
+      throw new Error("Name must be between 1 and 100 characters.");
+    if (args.comment.trim().length === 0 || args.comment.length > 500)
+      throw new Error("Comment must be between 1 and 500 characters.");
+    return await ctx.db.insert("generalFeedback", {
+      deviceId: args.deviceId,
+      name: args.name.trim(),
+      comment: args.comment.trim(),
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const getAllGeneralFeedback = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("generalFeedback")
+      .withIndex("by_createdAt")
+      .order("desc")
+      .collect();
+  },
+});

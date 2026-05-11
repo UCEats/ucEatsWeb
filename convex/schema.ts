@@ -51,7 +51,14 @@ export default defineSchema({
     storageId: v.id("_storage"),
     imageUrl: v.optional(v.string()),
     fileName: v.optional(v.string())
-  }).index("by_date_section",["date","section"])
+  }).index("by_date_section",["date","section"]),
+
+    generalFeedback: defineTable({
+    deviceId: v.string(),
+    name: v.string(),
+    comment: v.string(),
+    createdAt: v.number(),
+  }).index("by_createdAt", ["createdAt"]),
   
 });
 
