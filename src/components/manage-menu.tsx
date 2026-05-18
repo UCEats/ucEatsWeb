@@ -8,7 +8,9 @@ import {
   Star,
   Filter,
   Leaf,
+  ThumbsUp,
 } from "lucide-react";
+import { getDeviceId } from "../lib/deviceId";
 import DayContent from "./day-content";
 import MealModal from "./meal-modal";
 import GeneralFeedbackModal from "./general-feedback-modal";
@@ -71,6 +73,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
     const stored = localStorage.getItem("lastViewedGeneralFeedback");
     return stored ? Number(stored) : 0;
   });
+  const [deviceId] = useState<string>(() => getDeviceId());
 
   const LoadingSkeleton = () => (
     <ContentLoader height={100} width={400} speed={2}>
@@ -101,6 +104,9 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
   const createMealMutation = useMutation(api.tables.meals.createMeal);
   const updateMealMutation = useMutation(api.tables.meals.updateMeal);
   const deleteMealMutation = useMutation(api.tables.meals.deleteMeal);
+  const toggleMealFeedbackLike = useMutation(api.tables.feedbackLikes.toggleMealFeedbackLike);
+  const myMealLikesQuery = useQuery(api.tables.feedbackLikes.getMyMealLikes, { deviceId });
+  const likedMealIds = new Set<string>(myMealLikesQuery ?? []);
 
   const queryArgs = useMemo(
     () => (selectedDateID ? { dateId: selectedDateID as Id<"dates"> } : "skip"),
@@ -690,6 +696,7 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
         onClose={handleCloseGeneralFeedback}
         feedbackItems={generalFeedback ?? []}
         lastViewedAt={lastViewedAt}
+        deviceId={deviceId}
       />
       <section className="bg-background-50 border-t border-border mt-16">
         <div className="max-w-7xl mx-auto px-6 py-10">
@@ -752,7 +759,9 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
 
               {/* Feedback Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredFeedback.map((item) => (
+                {filteredFeedback.map((item) => {
+                  const isLiked = likedMealIds.has(item._id as string);
+                  return (
                   <div
                     key={item._id}
                     className="bg-white rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-shadow"
@@ -777,8 +786,28 @@ export default function ManageMenu({ onLogout }: ManageMenuProps) {
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {item.comment}
                     </p>
+
+                    {/* Like Button */}
+                    <div className="flex justify-end mt-4">
+                      <button
+                        onClick={() =>
+                          toggleMealFeedbackLike({ feedbackId: item._id as Id<"feedback">, deviceId })
+                        }
+                        className="p-1.5 rounded-full transition-colors hover:bg-gray-100"
+                        aria-label={isLiked ? "Unlike" : "Like"}
+                      >
+                        <ThumbsUp
+                          className={`w-4 h-4 transition-colors ${
+                            isLiked
+                              ? "fill-primary text-primary"
+                              : "text-gray-400"
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Empty State */}

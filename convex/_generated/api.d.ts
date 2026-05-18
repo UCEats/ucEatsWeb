@@ -8,10 +8,13 @@
  * @module
  */
 
+import type * as tables_acknowledgments from "../tables/acknowledgments.js";
 import type * as tables_dates from "../tables/dates.js";
 import type * as tables_feedback from "../tables/feedback.js";
+import type * as tables_feedbackLikes from "../tables/feedbackLikes.js";
 import type * as tables_files from "../tables/files.js";
 import type * as tables_meals from "../tables/meals.js";
+import type * as tables_notifications from "../tables/notifications.js";
 
 import type {
   ApiFromModules,
@@ -20,10 +23,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "tables/acknowledgments": typeof tables_acknowledgments;
   "tables/dates": typeof tables_dates;
   "tables/feedback": typeof tables_feedback;
+  "tables/feedbackLikes": typeof tables_feedbackLikes;
   "tables/files": typeof tables_files;
   "tables/meals": typeof tables_meals;
+  "tables/notifications": typeof tables_notifications;
 }>;
 
 /**
